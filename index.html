@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WHY B AI Office</title>
+<style>
+:root{--bg:#0c0b11;--panel:#17151f;--panel2:#211d2d;--purple:#8b5cf6;--purple2:#b39aff;--text:#f4f1fa;--muted:#aaa3ba;--line:#302a3d;--green:#53d39b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{position:sticky;top:0;background:#0c0b11eF;border-bottom:1px solid var(--line);z-index:2;padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-weight:850;letter-spacing:1.4px}.brand span{color:var(--purple2)}.sub{font-size:12px;color:var(--muted)}
+main{max-width:1000px;margin:auto;padding:18px 14px 90px}.welcome{background:linear-gradient(135deg,#29203e,#15131c 70%);border:1px solid #45335f;border-radius:18px;padding:20px;margin-bottom:18px}
+h1{font-size:23px;margin:0 0 6px}h2{font-size:18px;margin:0 0 13px}p{margin:6px 0;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0 20px}.stat{background:var(--panel);border:1px solid var(--line);padding:15px;border-radius:14px}.stat b{font-size:25px;display:block}.stat small{color:var(--muted)}
+.section{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin:14px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
+.worker{background:var(--panel2);border:1px solid var(--line);padding:13px;border-radius:13px}.avatar{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#4b3573;font-weight:800;margin-bottom:8px}.worker strong{display:block}.worker small{color:var(--muted);line-height:1.4}
+button{border:0;border-radius:10px;padding:11px 14px;font-weight:700;background:var(--purple);color:white;cursor:pointer}button.secondary{background:var(--panel2);border:1px solid var(--line)}button.danger{background:#6c2638}
+.tabs{display:flex;gap:8px;overflow:auto;margin:16px 0}.tabs button{white-space:nowrap}.tabs button.active{background:#6d42b4}
+.view{display:none}.view.active{display:block}
+input,select,textarea{width:100%;background:#100e16;color:var(--text);border:1px solid var(--line);padding:11px;border-radius:10px;margin:6px 0 12px;font:inherit}
+label{font-size:13px;color:var(--muted)}textarea{min-height:100px;resize:vertical}
+.task{border:1px solid var(--line);background:#14121a;border-radius:12px;padding:12px;margin:9px 0}.tasktop{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.pill{font-size:11px;border-radius:20px;padding:4px 8px;background:#392b50;color:#d8c4ff}.task p{margin:8px 0;color:#d2cddd}
+.task-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.task-actions button{padding:7px 9px;font-size:12px}
+.empty{color:var(--muted);padding:14px;text-align:center}
+footer{position:fixed;bottom:0;left:0;right:0;background:#0c0b11;border-top:1px solid var(--line);padding:10px;text-align:center;color:var(--muted);font-size:11px}
+@media(min-width:700px){.cards{grid-template-columns:repeat(4,1fr)}}
+</style>
+
+<meta name="theme-color" content="#0c0b11">
+<meta name="description" content="WHY B AI Office — Virtual Company Dashboard">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+}
+</script>
+</head>
+<body>
+<header><div><div class="brand">WHY <span>B</span> AI OFFICE</div><div class="sub">Virtual Company • CEO Command Center</div></div><div class="pill">V1 • LOCAL</div></header>
+<main>
+<div class="welcome"><h1>CEO Command Center</h1><p>Selamat datang ke pejabat maya WHY B. Urus pekerja, tugasan dan laporan dalam satu dashboard.</p></div>
+<div class="cards">
+<div class="stat"><b id="workerCount">7</b><small>AI Workers</small></div>
+<div class="stat"><b id="pendingCount">0</b><small>Tugasan pending</small></div>
+<div class="stat"><b id="activeCount">0</b><small>Dalam proses</small></div>
+<div class="stat"><b id="doneCount">0</b><small>Completed</small></div>
+</div>
+<div class="tabs">
+<button class="active" onclick="showView('home',this)">Dashboard</button>
+<button onclick="showView('workers',this)">AI Workers</button>
+<button onclick="showView('tasks',this)">Task Manager</button>
+<button onclick="showView('reports',this)">Reports</button>
+</div>
+<section id="home" class="view active">
+<div class="section"><h2>Team Directory</h2><div class="grid" id="previewWorkers"></div></div>
+<div class="section"><h2>Recent Tasks</h2><div id="recentTasks"></div></div>
+<div class="section"><h2>CEO Quick Command</h2><label>Masukkan arahan untuk direkod sebagai tugasan</label><textarea id="quickCommand" placeholder="Contoh: Nora kaji 5 idea ebook Islamik yang berpotensi..."></textarea><button onclick="quickAdd()">Assign Task</button></div>
+</section>
+<section id="workers" class="view"><div class="section"><h2>AI Worker Directory</h2><div class="grid" id="workerGrid"></div></div></section>
+<section id="tasks" class="view">
+<div class="section"><h2>Assign New Task</h2>
+<label>Nama tugasan</label><input id="taskTitle" placeholder="Contoh: Kajian pasaran eBook">
+<label>Assign kepada</label><select id="taskWorker"></select>
+<label>Butiran arahan</label><textarea id="taskDesc" placeholder="Tulis arahan lengkap..."></textarea>
+<button onclick="addTask()">Create Task</button></div>
+<div class="section"><h2>Task List</h2><div id="taskList"></div></div>
+</section>
+<section id="reports" class="view"><div class="section"><h2>Company Report</h2><p>Ringkasan tugasan semasa berdasarkan rekod dashboard ini.</p><div id="report"></div><button class="secondary" onclick="exportReport()">Export Report (.txt)</button></div></section>
+</main>
+<footer>Prototype dashboard — AI workers belum disambungkan ke model AI atau Shopify.</footer>
+<script>
+const workers=[
+{name:"Adam",role:"Team Leader",skills:"Koordinasi pasukan, pecahkan tugasan, semak hasil & laporan CEO",icon:"A"},
+{name:"Nora",role:"Market Researcher",skills:"Trend pasaran, pelanggan sasaran, idea produk & analisis pesaing",icon:"N"},
+{name:"Haziq",role:"Creative Director",skills:"Identiti visual, konsep kreatif, design brief & kandungan visual",icon:"H"},
+{name:"Hakim",role:"Copywriter",skills:"Product description, headline, ebook content & copywriting",icon:"H"},
+{name:"Ahmad",role:"Marketing Manager",skills:"Strategi promosi, content calendar, kempen & pemasaran",icon:"A"},
+{name:"Haiqal",role:"SEO Specialist",skills:"Keyword, SEO Shopify, metadata & struktur kandungan",icon:"H"},
+{name:"Aiman",role:"Store Analyst",skills:"Analisis KPI, prestasi produk, laporan & cadangan penambahbaikan",icon:"A"}
+];
+let tasks=JSON.parse(localStorage.getItem("whyBTasks")||"[]");
+function save(){localStorage.setItem("whyBTasks",JSON.stringify(tasks));render()}
+function showView(id,btn){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));document.getElementById(id).classList.add("active");document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));btn.classList.add("active")}
+function workerCards(){return workers.map(w=>`<div class="worker"><div class="avatar">${w.icon}</div><strong>${w.name}</strong><div class="sub">${w.role}</div><small>${w.skills}</small></div>`).join("")}
+function render(){
+ document.getElementById("previewWorkers").innerHTML=workers.slice(0,4).map(w=>`<div class="worker"><div class="avatar">${w.icon}</div><strong>${w.name}</strong><small>${w.role}</small></div>`).join("");
+ document.getElementById("workerGrid").innerHTML=workerCards();
+ document.getElementById("taskWorker").innerHTML=workers.map(w=>`<option>${w.name} — ${w.role}</option>`).join("");
+ document.getElementById("pendingCount").textContent=tasks.filter(t=>t.status==="Pending").length;
+ document.getElementById("activeCount").textContent=tasks.filter(t=>t.status==="In Progress").length;
+ document.getElementById("doneCount").textContent=tasks.filter(t=>t.status==="Completed").length;
+ const taskHtml=t=>`<div class="task"><div class="tasktop"><strong>${esc(t.title)}</strong><span class="pill">${t.status}</span></div><p><b>Worker:</b> ${esc(t.worker)}<br>${esc(t.desc||"Tiada butiran")}</p><div class="task-actions"><button class="secondary" onclick="statusTask(${t.id},'In Progress')">Start</button><button onclick="statusTask(${t.id},'Completed')">Complete</button><button class="danger" onclick="deleteTask(${t.id})">Delete</button></div></div>`;
+ document.getElementById("taskList").innerHTML=tasks.length?tasks.map(taskHtml).join(""):`<div class="empty">Belum ada tugasan. Tambah tugasan pertama di atas.</div>`;
+ document.getElementById("recentTasks").innerHTML=tasks.length?tasks.slice(-3).reverse().map(taskHtml).join(""):`<div class="empty">Tiada tugasan lagi.</div>`;
+ document.getElementById("report").innerHTML=`<p><b>Jumlah tugasan:</b> ${tasks.length}</p><p><b>Pending:</b> ${tasks.filter(t=>t.status==="Pending").length}</p><p><b>In Progress:</b> ${tasks.filter(t=>t.status==="In Progress").length}</p><p><b>Completed:</b> ${tasks.filter(t=>t.status==="Completed").length}</p><hr><p>Nota: laporan hanya mengira rekod dalam aplikasi prototaip ini.</p>`;
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function addTask(){let title=document.getElementById("taskTitle").value.trim();if(!title){alert("Isi nama tugasan dahulu.");return}let worker=document.getElementById("taskWorker").value;let desc=document.getElementById("taskDesc").value.trim();tasks.push({id:Date.now(),title,worker,desc,status:"Pending",created:new Date().toLocaleString("ms-MY")});document.getElementById("taskTitle").value="";document.getElementById("taskDesc").value="";save();alert("Tugasan direkodkan. Agent belum menjalankan tugasan secara AI.");}
+function quickAdd(){let v=document.getElementById("quickCommand").value.trim();if(!v)return;tasks.push({id:Date.now(),title:v.slice(0,80),worker:"Adam — Team Leader",desc:v,status:"Pending",created:new Date().toLocaleString("ms-MY")});document.getElementById("quickCommand").value="";save();alert("Arahan direkod sebagai tugasan Adam.");}
+function statusTask(id,s){let t=tasks.find(x=>x.id===id);if(t){t.status=s;save()}}
+function deleteTask(id){if(confirm("Padam tugasan ini?")){tasks=tasks.filter(t=>t.id!==id);save()}}
+function exportReport(){let lines=["WHY B AI OFFICE REPORT",new Date().toLocaleString("ms-MY"),"Total: "+tasks.length,"Pending: "+tasks.filter(t=>t.status==="Pending").length,"In Progress: "+tasks.filter(t=>t.status==="In Progress").length,"Completed: "+tasks.filter(t=>t.status==="Completed").length,"","TASKS",...tasks.map(t=>`${t.status} | ${t.worker} | ${t.title} | ${t.desc}`)];let blob=new Blob([lines.join("\n")],{type:"text/plain"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="WHYB-report.txt";a.click();URL.revokeObjectURL(a.href)}
+render();
+</script>
+</body>
+</html>
